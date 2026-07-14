@@ -48,3 +48,20 @@ jobs:
         with:
           name: smarttube-debug
           path: SmartTube/**/build/outputs/apk/**/*.apk
+
+      - name: Upload to Telegram
+        if: ${{ secrets.TELEGRAM_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          shopt -s globstar nullglob
+          for apk in SmartTube/**/build/outputs/apk/**/*.apk; do
+            echo "Uploading $(basename "$apk")..."
+            response=$(curl -s -F "chat_id=$TG_CHAT_ID" \
+              -F "document=@$apk" \
+              -F "caption=SmartTube Enhanced %23$RUN_ID" \
+              "https://api.telegram.org/bot$TG_TOKEN/sendDocument")
+            echo "$response" | grep -q '"ok":true' && echo "OK" || echo "FAIL: $response"
+          done
