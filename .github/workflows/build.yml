@@ -39,8 +39,35 @@ jobs:
         run: chmod +x gradlew
         working-directory: SmartTube
 
+      - name: Configure signing
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_KEY" ]; then
+            echo "$SIGNING_KEY" | base64 --decode > SmartTube/key.jks
+            echo "storePassword=$KEY_STORE_PASSWORD" > SmartTube/keystore.properties
+            echo "keyAlias=$ALIAS" >> SmartTube/keystore.properties
+            echo "keyPassword=$KEY_PASSWORD" >> SmartTube/keystore.properties
+            echo "storeFile=${{ github.workspace }}/SmartTube/key.jks" >> SmartTube/keystore.properties
+            echo "Signing configured."
+          else
+            echo "No signing key found, building unsigned."
+          fi
+
       - name: Build debug APK
         run: ./gradlew clean assembleStstableDebug --no-daemon --stacktrace
+        working-directory: SmartTube
+
+      - name: Build signed release APK
+        run: |
+          if [ -f keystore.properties ]; then
+            ./gradlew assembleStstableRelease --no-daemon --stacktrace
+          else
+            echo "No keystore, skipping release build."
+          fi
         working-directory: SmartTube
 
       - name: Upload APK
