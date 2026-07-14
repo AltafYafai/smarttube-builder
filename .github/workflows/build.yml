@@ -19,14 +19,20 @@ jobs:
           path: SmartTube
           submodules: recursive
 
-      - name: Set up JDK 14
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Switch to JDK 14 for build
         uses: actions/setup-java@v4
         with:
           java-version: 14
           distribution: zulu
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
 
       - name: Grant execute permission
         run: chmod +x gradlew
@@ -36,7 +42,7 @@ jobs:
         run: ./gradlew clean assembleStstableDebug --no-daemon --stacktrace
         working-directory: SmartTube
 
-      - name: Find and upload APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: smarttube-debug
