@@ -50,12 +50,15 @@ jobs:
           path: SmartTube/**/build/outputs/apk/**/*.apk
 
       - name: Upload to Telegram
-        if: ${{ secrets.TELEGRAM_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
         env:
           TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RUN_ID: ${{ github.run_id }}
         run: |
+          if [ -z "$TG_TOKEN" ] || [ -z "$TG_CHAT_ID" ]; then
+            echo "Telegram secrets not set, skipping upload."
+            exit 0
+          fi
           shopt -s globstar nullglob
           for apk in SmartTube/**/build/outputs/apk/**/*.apk; do
             echo "Uploading $(basename "$apk")..."
