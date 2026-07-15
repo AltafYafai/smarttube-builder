@@ -99,3 +99,18 @@ jobs:
             -F "document=@$apk" \
             -F "caption=SmartTube Enhanced %23$RUN_ID" \
             "https://api.telegram.org/bot$TG_TOKEN/sendDocument" | grep -q '"ok":true' && echo "OK" || echo "FAIL"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag_name: build-${{ github.run_id }}
+          name: SmartTube Enhanced build ${{ github.run_id }}
+          body: |
+            Automated build from SmartTube Enhanced private repo.
+            Triggered by commit on master branch.
+          files: SmartTube/**/build/outputs/apk/**/*.apk
+          fail_on_unmatched_files: false
+          make_latest: true
