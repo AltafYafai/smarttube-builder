@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Check out SmartTube (enhanced)
@@ -28,12 +30,6 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Switch to JDK 14 for build
-        uses: actions/setup-java@v4
-        with:
-          java-version: 14
-          distribution: zulu
 
       - name: Grant execute permission
         run: chmod +x gradlew
