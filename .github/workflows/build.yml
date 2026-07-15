@@ -53,14 +53,10 @@ jobs:
             echo "No signing key found, building unsigned."
           fi
 
-      - name: Build debug APK
-        run: ./gradlew clean assembleStstableDebug --no-daemon --stacktrace
-        working-directory: SmartTube
-
       - name: Build signed release APK
         run: |
           if [ -f keystore.properties ]; then
-            ./gradlew assembleStstableRelease --no-daemon --stacktrace
+            ./gradlew clean assembleStstableRelease --no-daemon --stacktrace
           else
             echo "No keystore, skipping release build."
           fi
@@ -98,7 +94,7 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
